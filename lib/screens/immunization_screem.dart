@@ -1,0 +1,256 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/immunization_model.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/screens/details_screen.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/screens/tb_immunization.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/immunization_service.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/spaces.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/widgets/form_dialog_widget.dart';
+
+class ImminizationScreen extends StatefulWidget {
+  const ImminizationScreen({Key? key});
+
+  @override
+  State<ImminizationScreen> createState() => _ImminizaitonScreenState();
+}
+
+class _ImminizaitonScreenState extends State<ImminizationScreen> {
+  late Future<List<Immunization>> futureImmunization;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    refreshImmunizationList();
+  }
+
+  void refreshImmunizationList() {
+    setState(() {
+      futureImmunization = ImmunizationService().fetchImmunization();
+    });
+  }
+
+  void searchImmunizations(String query) {
+    setState(() {
+      _searchQuery = query;
+      futureImmunization = ImmunizationService().searchImmunizations(query);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String formattedDate =
+        DateFormat('EEEE, dd/MM/yyyy').format(DateTime.now());
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ManagementScreen()),
+            );
+          },
+        ),
+        title: Center(
+          child: Column(
+            children: [
+              const Text(
+                'Immunization',
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                formattedDate,
+                style: const TextStyle(color: Colors.black, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        actions: const [
+          CircleAvatar(
+            backgroundColor: Colors.orange,
+            child: Icon(Icons.person, color: Colors.white),
+          ),
+          SizedBox(width: 10),
+        ],
+      ),
+      body: Column(
+        children: [
+          verticalSpacing(20),
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                filled: true,
+                fillColor: Colors.grey.shade200,
+                suffixIcon: const Icon(Icons.search),
+                hintText: 'Search...',
+              ),
+              onChanged: (value) {
+                searchImmunizations(value);
+              },
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Immunization>>(
+              future: futureImmunization,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("${snapshot.error}"));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No immunization records found."));
+                } else {
+                  List<Immunization> immunizations = snapshot.data!;
+                  List<Immunization> filteredList = _searchQuery.isEmpty
+                      ? immunizations
+                      : immunizations.where((immunization) =>
+                          immunization.id.toString().contains(_searchQuery) ||
+                          immunization.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                          immunization.vaccineName.toLowerCase().contains(_searchQuery.toLowerCase())
+                        ).toList();
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: SingleChildScrollView(
+                      child: DataTable(
+                        showCheckboxColumn: false,
+                        columnSpacing: 15,
+                        headingRowColor: WidgetStateColor.resolveWith((states) => const Color(0xFFB4CD78)),
+                        columns: const <DataColumn>[
+                          DataColumn(
+                            label: SizedBox(
+                              width: 150,
+                              child: Text(
+                                'Name',
+                                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: SizedBox(
+                              width: 60,
+                              child: Text(
+                                'V Name',
+                                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          DataColumn(
+                            label: SizedBox(
+                              width: 60,
+                              child: Text(
+                                'Vaccination\nBrand',
+                                style: TextStyle(fontStyle: FontStyle.italic, fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                        rows: filteredList.map((immunization) {
+                          return DataRow(
+                            cells: <DataCell>[
+                              DataCell(
+                                Text(immunization.name),
+                              ),
+                              DataCell(
+                                Text(immunization.vaccineName),
+                              ),
+                              DataCell(
+                                Text(immunization.vaccineBrand),
+                              ),
+                            ],
+                            onSelectChanged: (bool? selected) {
+                              if (selected == true) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ImmunizationDetailsScreen(
+                                      immunization: immunization,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ),
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF93A764),
+                     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    minimumSize: const Size(100, 50),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return FormDialogWidget(
+                          onImmunizationAddedOrUpdated: refreshImmunizationList,
+                        );
+                      },
+                    );
+                  },
+                  child: const Text(
+                    'Add Record',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                horizontalSpacing(10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF93A764),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    minimumSize: const Size(100, 50),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return FormDialogWidget(
+                          onImmunizationAddedOrUpdated: refreshImmunizationList,
+                        );
+                      },
+                    );
+                  },
+                  child: const Text(
+                    'Create Event',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+                verticalSpacing(50), 
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
