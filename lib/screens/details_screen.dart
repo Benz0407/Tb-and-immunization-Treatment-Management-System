@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/appointment_model.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/immunization_model.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/screens/immunization_screem.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/appointment_service.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/immunization_service.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/spaces.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/widgets/appointment_dialog_widget.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/widgets/appointments_widget.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/widgets/form_dialog_widget.dart';
 
 class ImmunizationDetailsScreen extends StatefulWidget {
   final Immunization immunization;
 
-  const ImmunizationDetailsScreen({super.key, required this.immunization});
+  const ImmunizationDetailsScreen({Key? key, required this.immunization}) : super(key: key);
 
   @override
   State<ImmunizationDetailsScreen> createState() =>
@@ -19,17 +22,22 @@ class ImmunizationDetailsScreen extends StatefulWidget {
 
 class _ImmunizationDetailsScreenState extends State<ImmunizationDetailsScreen> {
   late Future<Immunization> futureImmunization;
+  late Future<List<Appointment>> futureAppointments;
 
   @override
   void initState() {
     super.initState();
     futureImmunization = Future.value(widget.immunization);
+    futureAppointments = AppointmentService()
+        .fetchAppointmentsByImmunizationId(widget.immunization.id);
   }
 
   void refreshImmunizationDetails() {
     setState(() {
       futureImmunization =
           ImmunizationService().fetchImmunizationById(widget.immunization.id);
+      futureAppointments = AppointmentService()
+          .fetchAppointmentsByImmunizationId(widget.immunization.id);
     });
   }
 
@@ -47,7 +55,8 @@ class _ImmunizationDetailsScreenState extends State<ImmunizationDetailsScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const ImminizationScreen()),
+                builder: (context) => const ImminizationScreen(),
+              ),
             );
           },
         ),
@@ -87,9 +96,9 @@ class _ImmunizationDetailsScreenState extends State<ImmunizationDetailsScreen> {
           SizedBox(width: 10),
         ],
       ),
-      body: FutureBuilder<Immunization>(
-        future: futureImmunization,
-        builder: (context, snapshot) {
+      body: FutureBuilder(
+        future: Future.wait([futureImmunization, futureAppointments]),
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
@@ -97,7 +106,9 @@ class _ImmunizationDetailsScreenState extends State<ImmunizationDetailsScreen> {
           } else if (!snapshot.hasData) {
             return const Center(child: Text('No data available'));
           } else {
-            Immunization immunization = snapshot.data!;
+            Immunization immunization = snapshot.data![0];
+            List<Appointment> appointments = snapshot.data![1];
+
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -165,38 +176,40 @@ class _ImmunizationDetailsScreenState extends State<ImmunizationDetailsScreen> {
                         'Date Administered', immunization.dateAdministered),
                     buildInfoField(
                         'Administered By', immunization.administeredBy),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF93A764),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 50, vertical: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            minimumSize: const Size(100, 50),
+                    appointments.isNotEmpty
+                        ? AppointmentsListWidget(
+                            appointments: appointments,
+                          )
+                        : Container(),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF93A764),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 50, vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AppointmentFormDialog (
-                                  onSaveAppointment: (appointment) {
-                                    // Handle saving the appointment
-                                    // For example: saveAppointment(appointment);
-                                  }, immunization: immunization,
-                                );
-                              },
-                            );
-                          },
-                          child: const Text(
-                            'Create Appointment',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
+                          minimumSize: const Size(100, 50),
                         ),
-                      ],
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AppointmentFormDialog(
+                                onSaveAppointment: (appointment) {
+                                  refreshImmunizationDetails();
+                                },
+                                immunization: immunization,
+                              );
+                            },
+                          );
+                        },
+                        child: const Text(
+                          'Create Appointment',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
                     ),
                   ],
                 ),
