@@ -13,7 +13,7 @@ import 'package:management_of_immunizataion_and_tuberculosis_treatment/widgets/f
 class ImmunizationDetailsScreen extends StatefulWidget {
   final Immunization immunization;
 
-  const ImmunizationDetailsScreen({Key? key, required this.immunization}) : super(key: key);
+  const ImmunizationDetailsScreen({super.key, required this.immunization});
 
   @override
   State<ImmunizationDetailsScreen> createState() =>

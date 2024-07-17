@@ -34,6 +34,7 @@ class EventService {
     }
   }
 
+
   Future<List<String>> fetchAllParticipants() async {
     final response =
         await http.get(Uri.parse('${getBaseUrl()}/fetch_participants.php'));
@@ -46,27 +47,70 @@ class EventService {
     }
   }
 
-  Future<void> saveEvent(Event eventData) async {
+  Future<void> saveEvent(Event event, List<String> participants) async {
     final apiUrl = Uri.parse('${getBaseUrl()}/save_event.php');
-    try {
-      final response = await http.post(
-        apiUrl,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(eventData.toJson()),
-      );
+    
+    // Convert participants list to a JSON array
+    List<Map<String, dynamic>> participantsJson = participants.map((name) => {'participant_name': name}).toList();
+    
+    // Create payload
+    Map<String, dynamic> payload = {
+      'purpose': event.purpose,
+      'date': event.date,
+      'time': event.time,
+      'venue': event.venue,
+      'bhwOrNurse': event.bhwOrNurse,
+      'notes': event.notes,
+      'participants': json.encode(participantsJson), // Convert to JSON string
+    };
 
-      // Debugging statement to check the response
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+    // Make POST request
+    final response = await http.post(
+      apiUrl,
+      body: json.encode(payload),
+      headers: {'Content-Type': 'application/json'},
+    );
 
-      // Decode the response body
-      final responseData = jsonDecode(response.body);
-      print('Decoded response data: $responseData');
-    } catch (e) {
-      print('Exception during event save: $e');
+    if (response.statusCode == 200) {
+      print('Event saved successfully');
+    } else {
       throw Exception('Failed to save event');
     }
   }
+
+Future<List<String>> fetchEventParticipants(int eventId) async {
+  print('Fetching participants for event ID: $eventId');
+  
+  final response = await http.get(
+    Uri.parse('${getBaseUrl()}/fetch_event_participants.php?event_id=$eventId'),
+  );
+
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    print('Parsed response data: $data');
+
+    // Ensure 'success' is treated as a boolean
+    bool success = data['success'] == true;
+
+    if (success) {
+      List<String> participants = List<String>.from(data['participants']);
+      print('Participants: $participants');
+      return participants;
+    } else {
+      print('Error: ${data['message']}');
+      throw Exception(data['message']);
+    }
+  } else {
+    print('Failed to load participants');
+    throw Exception('Failed to load participants');
+  }
 }
+
+
+
+
+}
+

@@ -44,7 +44,7 @@ class Event {
       date: json['date'].toString(),
       time: json['time'] ?? '', 
       venue: json['venue'] ?? '',
-      // participants: List<String>.from(json['participants'] ?? ''),
+      // participants: json['participants'] != null ? List<String>.from(json['participants']) : null,
       bhwOrNurse: json['bhw_or_nurse_name'] ?? '',
       notes: json['notes'] ?? '',
     );
@@ -52,7 +52,7 @@ class Event {
 
   @override
   String toString() {
-    return 'Event(purpose: $purpose, date: $date, time: $time, venue: $venue, bhwOrNurse: $bhwOrNurse, notes: $notes)';
+    return 'Event(purpose: $purpose, date: $date, time: $time, venue: $venue, bhwOrNurse: $bhwOrNurse, notes: $notes, participants: $participants)';
   }
 
    DateTime get parsedDate {

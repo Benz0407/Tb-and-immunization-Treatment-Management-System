@@ -22,6 +22,7 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _hasEventToday = false;
+  List<Event> _events = [];
 
   @override
   void initState() {
@@ -36,29 +37,37 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
     });
   }
 
-  Future<void> _checkForEvents() async {
+Future<void> _checkForEvents() async {
+  try {
     EventService eventService = EventService();
     List<Event> events = await eventService.fetchEvents();
 
-    // Print each event for debugging
-    for (var event in events) {
-      print('Fetched event: $event');
+    for (Event event in events) {
+      try {
+        print('Fetching participants for event with ID: ${event.id}');
+        List<String> participants = await eventService.fetchEventParticipants(event.id!);
+        event.participants = participants;
+      } catch (e) {
+        print('Error fetching participants for event ${event.id}: $e');
+      }
     }
 
-    // Check if there's an event scheduled for today
-    DateTime today = DateTime.now();
-    bool hasEventToday = events.any((event) {
-      DateTime eventDate =
-          DateFormat('yyyy-MM-dd').parse(event.date); // Parse the date string
-      return eventDate.year == today.year &&
-          eventDate.month == today.month &&
-          eventDate.day == today.day;
-    });
-
     setState(() {
-      _hasEventToday = hasEventToday;
+      _events = events;
+      DateTime today = DateTime.now();
+      _hasEventToday = events.any((event) {
+        DateTime eventDate = DateFormat('yyyy-MM-dd').parse(event.date);
+        return eventDate.year == today.year &&
+            eventDate.month == today.month &&
+            eventDate.day == today.day;
+      });
     });
+  } catch (e) {
+    print('Error checking for events: $e');
   }
+}
+
+
 
   void searchImmunizations(String query) {
     setState(() {
@@ -68,9 +77,40 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
   }
 
   void handleEventSaved(Map<String, dynamic> eventData) {
-    // Handle event saved logic here, e.g., update UI
-    refreshImmunizationList(); // Refresh immunization list after event saved
+    refreshImmunizationList();
   }
+  
+ void _showEventDetailsDialog(Event event) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Event Details'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Purpose: ${event.purpose}'),
+              Text('Date: ${event.date}'),
+              Text('Time: ${event.time}'),
+              Text('Venue: ${event.venue}'),
+              Text('Participants: ${event.participants?.join(", ")}'),
+              Text('BHW/Nurse: ${event.bhwOrNurse}'),
+              Text('Notes: ${event.notes}'),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -136,14 +176,28 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
             ),
           ),
           if (_hasEventToday)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12.0),
-              color: Colors.orange,
-              child: const Text(
-                "There's an event scheduled for today.",
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: () {
+                _showEventDetailsDialog(
+                  _events.firstWhere((event) {
+                    DateTime eventDate =
+                        DateFormat('yyyy-MM-dd').parse(event.date);
+                    DateTime today = DateTime.now();
+                    return eventDate.year == today.year &&
+                        eventDate.month == today.month &&
+                        eventDate.day == today.day;
+                  }),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12.0),
+                color: Colors.orange,
+                child: const Text(
+                  "There's an event scheduled for today.",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           verticalSpacing(20),

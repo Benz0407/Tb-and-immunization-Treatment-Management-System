@@ -44,21 +44,26 @@ class EventFormDialogState extends State<EventFormDialog> {
 
   Future<void> _saveEvent() async {
     Event eventData = Event(
-        purpose: _purposeController.text,
-        date: _dateController.text,
-        time: _timeController.text,
-        venue: _venueController.text,
-        bhwOrNurse: _bhwOrNurse,
-        notes: _notesController.text);
-    print(eventData);
-
-    await EventService().saveEvent(eventData);
-
-    widget.onSaveEvent(eventData); // Pass event data back to parent
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Event created successfully')),
+      purpose: _purposeController.text,
+      date: _dateController.text,
+      time: _timeController.text,
+      venue: _venueController.text,
+      bhwOrNurse: _bhwOrNurse,
+      notes: _notesController.text,
     );
+
+    try {
+      await EventService().saveEvent(eventData, _selectedParticipants);
+      widget.onSaveEvent(eventData); // Pass event data back to parent
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event created successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to save event')),
+      );
+      print('Error saving event: $e');
+    }
   }
 
   @override
