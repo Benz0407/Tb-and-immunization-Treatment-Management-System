@@ -36,16 +36,24 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
     });
   }
 
-Future<void> _checkForEvents() async {
+  Future<void> _checkForEvents() async {
     EventService eventService = EventService();
     List<Event> events = await eventService.fetchEvents();
 
+    // Print each event for debugging
+    for (var event in events) {
+      print('Fetched event: $event');
+    }
+
     // Check if there's an event scheduled for today
     DateTime today = DateTime.now();
-    bool hasEventToday = events.any((event) =>
-        event.date.year == today.year &&
-        event.date.month == today.month &&
-        event.date.day == today.day);
+    bool hasEventToday = events.any((event) {
+      DateTime eventDate =
+          DateFormat('yyyy-MM-dd').parse(event.date); // Parse the date string
+      return eventDate.year == today.year &&
+          eventDate.month == today.month &&
+          eventDate.day == today.day;
+    });
 
     setState(() {
       _hasEventToday = hasEventToday;
@@ -58,8 +66,8 @@ Future<void> _checkForEvents() async {
       futureImmunization = ImmunizationService().searchImmunizations(query);
     });
   }
-  
-    void handleEventSaved(Map<String, dynamic> eventData) {
+
+  void handleEventSaved(Map<String, dynamic> eventData) {
     // Handle event saved logic here, e.g., update UI
     refreshImmunizationList(); // Refresh immunization list after event saved
   }

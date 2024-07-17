@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
-
 class Appointment {
-  int? id; 
-  int? immunizationId; 
+  int? id;
+  int? immunizationId;
   final String purpose;
   final String date;
   final String time;
@@ -16,7 +14,7 @@ class Appointment {
     required this.date,
     required this.time,
     required this.bhwOrNurse,
-    required this.notes, 
+    required this.notes,
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) {

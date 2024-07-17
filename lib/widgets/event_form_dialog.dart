@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/event_model.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/event_services.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/custom_multiselect.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -40,23 +41,25 @@ class EventFormDialogState extends State<EventFormDialog> {
       print('Error fetching participants: $e');
     }
   }
-Future<void> _saveEvent(Map<String, dynamic> eventData) async {
-  try {
+
+  Future<void> _saveEvent() async {
+    Event eventData = Event(
+        purpose: _purposeController.text,
+        date: _dateController.text,
+        time: _timeController.text,
+        venue: _venueController.text,
+        bhwOrNurse: _bhwOrNurse,
+        notes: _notesController.text);
+    print(eventData);
+
     await EventService().saveEvent(eventData);
+
     widget.onSaveEvent(eventData); // Pass event data back to parent
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Event created successfully')),
     );
-  } catch (e, stackTrace) {
-    print('Exception during event save: $e');
-    print('Stack Trace: $stackTrace'); // Log the stack trace for detailed error
-    // Handle error state or display a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to save event: $e')),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +137,7 @@ Future<void> _saveEvent(Map<String, dynamic> eventData) async {
                             );
                             if (pickedDate != null) {
                               _dateController.text =
-                                  DateFormat('yyyy-MM-dd').format(pickedDate);
+                                  DateFormat('MM/dd/yyyy').format(pickedDate);
                             }
                           },
                           child: AbsorbPointer(
@@ -355,29 +358,7 @@ Future<void> _saveEvent(Map<String, dynamic> eventData) async {
                             TextButton(
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  print(
-                                      'Purpose (${_purposeController.text.runtimeType}): ${_purposeController.text}');
-                                  print(
-                                      'Date (${_dateController.text.runtimeType}): ${_dateController.text}');
-                                  print(
-                                      'Time (${_timeController.text.runtimeType}): ${_timeController.text}');
-                                  print(
-                                      'Venue (${_venueController.text.runtimeType}): ${_venueController.text}');
-                                  print(
-                                      'Participants (${_selectedParticipants.runtimeType}): ${_selectedParticipants}');
-                                  print(
-                                      'BHW or Nurse (${_bhwOrNurse.runtimeType}): ${_bhwOrNurse}');
-                                  print(
-                                      'Notes (${_notesController.text.runtimeType}): ${_notesController.text}');
-                                  _saveEvent({
-                                    'purpose': _purposeController.text,
-                                    'date': _dateController.text,
-                                    'time': _timeController.text,
-                                    'venue': _venueController.text,
-                                    'participants': _selectedParticipants,
-                                    'bhwOrNurse': _bhwOrNurse,
-                                    'notes': _notesController.text,
-                                  });
+                                  _saveEvent();
                                   Navigator.of(context).pop();
                                 }
                               },

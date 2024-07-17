@@ -1,13 +1,15 @@
 
 
 
+import 'package:intl/intl.dart';
+
 class Event {
   int? id;
   final String purpose;
-  final DateTime date;
+  final String date;
   final String time;
   final String venue;
-  final List<String> participants;
+  List<String>? participants;
   final String bhwOrNurse;
   final String notes;
 
@@ -17,7 +19,7 @@ class Event {
     required this.date,
     required this.time,
     required this.venue,
-    required this.participants,
+    this.participants,
     required this.bhwOrNurse,
     required this.notes,
   });
@@ -26,10 +28,10 @@ class Event {
     return {
       'id': id,
       'purpose': purpose,
-      'date': date.toIso8601String(),
+      'date': date,
       'time': time, 
       'venue': venue,
-      'participants': participants,
+      // 'participants': participants,
       'bhwOrNurse': bhwOrNurse,
       'notes': notes,
     };
@@ -38,13 +40,22 @@ class Event {
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
       id: int.parse(json['id']),
-      purpose: json['purpose'],
-      date: DateTime.parse(json['date']),
-      time: json['time'], 
-      venue: json['venue'],
-      participants: List<String>.from(json['participants']),
-      bhwOrNurse: json['bhw_or_nurse_name'],
-      notes: json['notes'],
+      purpose: json['purpose'] ?? '',
+      date: json['date'].toString(),
+      time: json['time'] ?? '', 
+      venue: json['venue'] ?? '',
+      // participants: List<String>.from(json['participants'] ?? ''),
+      bhwOrNurse: json['bhw_or_nurse_name'] ?? '',
+      notes: json['notes'] ?? '',
     );
+  }
+
+  @override
+  String toString() {
+    return 'Event(purpose: $purpose, date: $date, time: $time, venue: $venue, bhwOrNurse: $bhwOrNurse, notes: $notes)';
+  }
+
+   DateTime get parsedDate {
+    return DateFormat('yyyy-MM-dd').parse(date);
   }
 }

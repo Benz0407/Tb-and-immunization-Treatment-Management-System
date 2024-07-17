@@ -20,8 +20,11 @@ class EventService {
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
 
+      // Print the raw JSON response for debugging
+      print('Raw JSON response: $jsonResponse');
+
+      // Handle empty response
       if (jsonResponse.isEmpty) {
-        // No records found
         return [];
       }
 
@@ -43,33 +46,24 @@ class EventService {
     }
   }
 
-  Future<void> saveEvent(Map<String, dynamic> eventData) async {
-    final apiUrl = Uri.parse('${getBaseUrl()}/fetch_events.php');
+  Future<void> saveEvent(Event eventData) async {
+    final apiUrl = Uri.parse('${getBaseUrl()}/save_event.php');
     try {
       final response = await http.post(
         apiUrl,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(eventData),
+        body: jsonEncode(eventData.toJson()),
       );
 
-      // if (response.statusCode == 200) {
-      //   final responseData = jsonDecode(response.body);
-      //   if (responseData['status'] == 1) {
-      //     // Handle success
-      //     print('Event saved successfully');
-      //   } else {
-      //     // Handle error
-      //     print('Failed to save event: ${responseData['message']}');
-      //     throw Exception('Failed to save event');
-      //   }
-      // } else {
-      //   // Handle HTTP error
-      //   print('Failed to save event. Status code: ${response.statusCode}');
-      //   print('Response body: ${response.body}');
-      //   throw Exception('Failed to save event');
-      // }
+      // Debugging statement to check the response
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // Decode the response body
+      final responseData = jsonDecode(response.body);
+      print('Decoded response data: $responseData');
     } catch (e) {
       print('Exception during event save: $e');
       throw Exception('Failed to save event');
