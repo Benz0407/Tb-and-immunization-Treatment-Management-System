@@ -44,11 +44,11 @@ Future<void> _checkForEvents() async {
 
     for (Event event in events) {
       try {
-        print('Fetching participants for event with ID: ${event.id}');
+        // print('Fetching participants for event with ID: ${event.id}');
         List<String> participants = await eventService.fetchEventParticipants(event.id!);
         event.participants = participants;
       } catch (e) {
-        print('Error fetching participants for event ${event.id}: $e');
+        // print('Error fetching participants for event ${event.id}: $e');
       }
     }
 
@@ -134,7 +134,7 @@ Future<void> _checkForEvents() async {
           child: Column(
             children: [
               const Text(
-                'Immunization',
+                'Immunization Records',
                 style:
                     TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
               ),

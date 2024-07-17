@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/appointment_model.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/tb_appointment_model.dart';
 
 String getBaseUrl() {
   if (kIsWeb) {
@@ -26,7 +27,32 @@ class AppointmentService {
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['status'] == 'success') {
-          print('Appointment added successfully: ${responseData['message']}');
+          // print('Appointment added successfully: ${responseData['message']}');
+        } else {
+          throw Exception('Failed to add appointment: ${responseData['message']}');
+        }
+      } else {
+        throw Exception('Failed to add appointment. Status Code: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error adding appointment: $e');
+    }
+  }
+
+  Future<void> tbAddAppointment(TbAppointment appointment) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${getBaseUrl()}/tb_add_appointments.php'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(appointment.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (responseData['status'] == 'success') {
+          // print('Appointment added successfully: ${responseData['message']}');
         } else {
           throw Exception('Failed to add appointment: ${responseData['message']}');
         }
@@ -48,6 +74,30 @@ class AppointmentService {
         return Appointment(
           id: appointmentJson['id'],
           immunizationId: appointmentJson['immunization_id'],
+          purpose: appointmentJson['purpose'],
+          date: appointmentJson['date'],
+          time: appointmentJson['time'],
+          bhwOrNurse: appointmentJson['bhwOrNurse'],
+          notes: appointmentJson['notes'],
+        );
+      }).toList();
+
+      return appointments;
+    } else {
+      throw Exception('Failed to fetch appointments');
+    }
+  }
+
+  Future<List<TbAppointment>> fetchAppointmentsByTbId(int? tuberculosisId) async {
+    final response = await http.get(Uri.parse('${getBaseUrl()}/tb_fetch_appointments.php?tuberculosis_id=$tuberculosisId'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+
+      List<TbAppointment> appointments = data.map((appointmentJson) {
+        return TbAppointment(
+          id: appointmentJson['id'],
+          tuberculosisId: appointmentJson['tuberculosis_id'],
           purpose: appointmentJson['purpose'],
           date: appointmentJson['date'],
           time: appointmentJson['time'],

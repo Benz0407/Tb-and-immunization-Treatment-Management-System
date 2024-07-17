@@ -21,7 +21,7 @@ class EventService {
       List jsonResponse = json.decode(response.body);
 
       // Print the raw JSON response for debugging
-      print('Raw JSON response: $jsonResponse');
+      // print('Raw JSON response: $jsonResponse');
 
       // Handle empty response
       if (jsonResponse.isEmpty) {
@@ -72,39 +72,39 @@ class EventService {
     );
 
     if (response.statusCode == 200) {
-      print('Event saved successfully');
+      // print('Event saved successfully');
     } else {
       throw Exception('Failed to save event');
     }
   }
 
 Future<List<String>> fetchEventParticipants(int eventId) async {
-  print('Fetching participants for event ID: $eventId');
+  // print('Fetching participants for event ID: $eventId');
   
   final response = await http.get(
     Uri.parse('${getBaseUrl()}/fetch_event_participants.php?event_id=$eventId'),
   );
 
-  print('Response status: ${response.statusCode}');
-  print('Response body: ${response.body}');
+  // print('Response status: ${response.statusCode}');
+  // print('Response body: ${response.body}');
 
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
-    print('Parsed response data: $data');
+    // print('Parsed response data: $data');
 
     // Ensure 'success' is treated as a boolean
     bool success = data['success'] == true;
 
     if (success) {
       List<String> participants = List<String>.from(data['participants']);
-      print('Participants: $participants');
+      // print('Participants: $participants');
       return participants;
     } else {
-      print('Error: ${data['message']}');
+      // print('Error: ${data['message']}');
       throw Exception(data['message']);
     }
   } else {
-    print('Failed to load participants');
+    // print('Failed to load participants');
     throw Exception('Failed to load participants');
   }
 }

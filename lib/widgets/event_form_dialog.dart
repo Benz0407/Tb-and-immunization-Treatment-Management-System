@@ -38,7 +38,7 @@ class EventFormDialogState extends State<EventFormDialog> {
         _allParticipants = participants;
       });
     } catch (e) {
-      print('Error fetching participants: $e');
+      // print('Error fetching participants: $e');
     }
   }
 
@@ -62,7 +62,7 @@ class EventFormDialogState extends State<EventFormDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to save event')),
       );
-      print('Error saving event: $e');
+      // print('Error saving event: $e');
     }
   }
 

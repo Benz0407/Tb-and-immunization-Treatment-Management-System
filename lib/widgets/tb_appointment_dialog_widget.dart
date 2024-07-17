@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/appointment_model.dart';
-import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/immunization_model.dart';
+
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/tb_appointment_model.dart';
+import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/tb_model.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/appointment_service.dart';
-import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/date_selection.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/notification.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/spaces.dart';
 
-class AppointmentFormDialog extends StatefulWidget {
-  final Immunization immunization;
-  final Function(Appointment) onSaveAppointment;
+class TbAppointmentFormDialog extends StatefulWidget {
+  final Tuberculosis tuberculosis;
+  final Function(TbAppointment) onSaveAppointment;
 
-  const AppointmentFormDialog({
+  const TbAppointmentFormDialog({
     super.key,
-    required this.onSaveAppointment,
-    required this.immunization,
+    required this.tuberculosis,
+    required this.onSaveAppointment
+    
   });
 
   @override
-  AppointmentFormDialogState createState() => AppointmentFormDialogState();
+  TbAppointmentFormDialogState createState() => TbAppointmentFormDialogState();
 }
 
-class AppointmentFormDialogState extends State<AppointmentFormDialog> {
+class TbAppointmentFormDialogState extends State<TbAppointmentFormDialog> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AppointmentService _appointmentService = AppointmentService(); 
 
@@ -72,8 +73,8 @@ class AppointmentFormDialogState extends State<AppointmentFormDialog> {
 
   void _saveForm() async{
     if (_formKey.currentState!.validate()) {
-      Appointment appointment = Appointment(
-        immunizationId: widget.immunization.id,
+      TbAppointment appointment = TbAppointment(
+        tuberculosisId: widget.tuberculosis.id,
         purpose: _purposeController.text,
         date: _dateController.text,
         time: _timeController.text,
@@ -82,7 +83,7 @@ class AppointmentFormDialogState extends State<AppointmentFormDialog> {
       );
 
       widget.onSaveAppointment(appointment);
-      await _appointmentService.addAppointment(appointment); 
+      await _appointmentService.tbAddAppointment(appointment); 
       _snackbarHelper.showSnackbar('Appointment saved successfully');
       Navigator.of(context).pop();
     } else {
