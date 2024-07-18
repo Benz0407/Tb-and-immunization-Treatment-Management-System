@@ -104,7 +104,6 @@ class FormDialogWidgetState extends State<FormDialogWidget> {
           child: Form(
             key: _formKey,
             child: Container(
-              // padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10.0),

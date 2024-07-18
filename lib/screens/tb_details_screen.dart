@@ -156,7 +156,6 @@ class _TbDetailsScreenState extends State<TbDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    buildInfoField('Name', tb.name),
                     buildInfoField('TB Brand', tb.tbBrand),
                     buildInfoField('Batch Number', tb.batchNumber),
                     buildInfoField('Expiry Date', tb.expiryDate),

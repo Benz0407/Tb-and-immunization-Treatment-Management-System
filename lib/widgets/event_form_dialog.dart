@@ -21,7 +21,7 @@ class EventFormDialogState extends State<EventFormDialog> {
   final TextEditingController _timeController = TextEditingController();
   final TextEditingController _venueController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
-  String _bhwOrNurse = 'Nurse 1';
+  String _bhwOrNurse = 'Who set the event';
   List<String> _selectedParticipants = [];
   List<String> _allParticipants = [];
 
@@ -54,7 +54,7 @@ class EventFormDialogState extends State<EventFormDialog> {
 
     try {
       await EventService().saveEvent(eventData, _selectedParticipants);
-      widget.onSaveEvent(eventData); // Pass event data back to parent
+      widget.onSaveEvent(eventData); 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Event created successfully')),
       );
@@ -272,14 +272,14 @@ class EventFormDialogState extends State<EventFormDialog> {
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context)
-                                            .pop(null); // Cancel selection
+                                            .pop(null); 
                                       },
                                       child: const Text('Cancel'),
                                     ),
                                     TextButton(
                                       onPressed: () {
                                         Navigator.of(context).pop(
-                                            initialSelected); // Confirm selection
+                                            initialSelected);
                                       },
                                       child: const Text('OK'),
                                     ),
@@ -300,11 +300,18 @@ class EventFormDialogState extends State<EventFormDialog> {
                             hintText: 'Tap to select participants',
                             border: OutlineInputBorder(),
                           ),
+                          validator: (value) {
+                            if (_selectedParticipants.isEmpty) {
+                              return 'Please select at least one participant';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
                           value: _bhwOrNurse,
                           items: [
+                            'Who set the event',
                             'Nurse 1',
                             'Nurse 2',
                             'Nurse 3',
@@ -329,6 +336,12 @@ class EventFormDialogState extends State<EventFormDialog> {
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                           ),
+                          validator: (value) {
+                            if (value == 'Who set the event' || value == null || value.isEmpty) {
+                              return 'Please select an option';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 12),
                         TextFormField(

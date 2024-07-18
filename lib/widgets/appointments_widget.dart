@@ -46,7 +46,7 @@ class AppointmentsListWidget extends StatelessWidget {
                             Text('Date: ${appointment.date}, Time: ${appointment.time}'),
                             Text('BHW/Nurse Assigned: ${appointment.bhwOrNurse}'),
                             Text('Notes: ${appointment.notes}')
-                            // Add more details here if needed
+                            
                           ],
                         ),
                         actions: [
