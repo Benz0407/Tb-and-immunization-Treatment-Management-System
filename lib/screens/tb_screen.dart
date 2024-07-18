@@ -64,7 +64,7 @@ class _TbScreenState extends State<TbScreen> {
         });
       });
     } catch (e) {
-      print('Error checking for events: $e');
+      // print('Error checking for events: $e');
     }
   }
 
@@ -198,7 +198,32 @@ class _TbScreenState extends State<TbScreen> {
                 ),
               ),
             ),
-          verticalSpacing(20),
+          verticalSpacing(10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF93A764),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    minimumSize: const Size(100, 45),
+                  ),
+                  onPressed: () {
+                    
+                  },
+                  child: const Text(
+                    'Generate Report',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          verticalSpacing(10),
           Expanded(
             child: FutureBuilder<List<Tuberculosis>>(
               future: futureTuberculosis,
@@ -216,9 +241,7 @@ class _TbScreenState extends State<TbScreen> {
                       ? tbRecords
                       : tbRecords
                           .where((tb) =>
-                              tb.id
-                                  .toString()
-                                  .contains(_searchQuery) ||
+                              tb.id.toString().contains(_searchQuery) ||
                               tb.name
                                   .toLowerCase()
                                   .contains(_searchQuery.toLowerCase()) ||
@@ -291,8 +314,7 @@ class _TbScreenState extends State<TbScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        TbDetailsScreen(
+                                    builder: (context) => TbDetailsScreen(
                                       tb: tb,
                                     ),
                                   ),
@@ -327,7 +349,8 @@ class _TbScreenState extends State<TbScreen> {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return TbFormDialogWidget(onTbAddedOrUpdated: refreshTbList);
+                        return TbFormDialogWidget(
+                            onTbAddedOrUpdated: refreshTbList);
                       },
                     );
                   },

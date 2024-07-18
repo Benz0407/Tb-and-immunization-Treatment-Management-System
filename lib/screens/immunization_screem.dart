@@ -200,7 +200,32 @@ Future<void> _checkForEvents() async {
                 ),
               ),
             ),
-          verticalSpacing(20),
+          verticalSpacing(10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF93A764),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    minimumSize: const Size(100, 45),
+                  ),
+                  onPressed: () {
+                    
+                  },
+                  child: const Text(
+                    'Generate Report',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          verticalSpacing(10),
           Expanded(
             child: FutureBuilder<List<Immunization>>(
               future: futureImmunization,

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/model/event_model.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/services/event_services.dart';
 import 'package:management_of_immunizataion_and_tuberculosis_treatment/utils/custom_multiselect.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
+
 
 class EventFormDialog extends StatefulWidget {
   final Function onSaveEvent;
