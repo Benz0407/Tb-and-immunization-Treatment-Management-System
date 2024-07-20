@@ -37,37 +37,36 @@ class _ImminizaitonScreenState extends State<ImminizationScreen> {
     });
   }
 
-Future<void> _checkForEvents() async {
-  try {
-    EventService eventService = EventService();
-    List<Event> events = await eventService.fetchEvents();
+  Future<void> _checkForEvents() async {
+    try {
+      EventService eventService = EventService();
+      List<Event> events = await eventService.fetchEvents();
 
-    for (Event event in events) {
-      try {
-        // print('Fetching participants for event with ID: ${event.id}');
-        List<String> participants = await eventService.fetchEventParticipants(event.id!);
-        event.participants = participants;
-      } catch (e) {
-        // print('Error fetching participants for event ${event.id}: $e');
+      for (Event event in events) {
+        try {
+          // print('Fetching participants for event with ID: ${event.id}');
+          List<String> participants =
+              await eventService.fetchEventParticipants(event.id!);
+          event.participants = participants;
+        } catch (e) {
+          // print('Error fetching participants for event ${event.id}: $e');
+        }
       }
-    }
 
-    setState(() {
-      _events = events;
-      DateTime today = DateTime.now();
-      _hasEventToday = events.any((event) {
-        DateTime eventDate = DateFormat('yyyy-MM-dd').parse(event.date);
-        return eventDate.year == today.year &&
-            eventDate.month == today.month &&
-            eventDate.day == today.day;
+      setState(() {
+        _events = events;
+        DateTime today = DateTime.now();
+        _hasEventToday = events.any((event) {
+          DateTime eventDate = DateFormat('yyyy-MM-dd').parse(event.date);
+          return eventDate.year == today.year &&
+              eventDate.month == today.month &&
+              eventDate.day == today.day;
+        });
       });
-    });
-  } catch (e) {
-    print('Error checking for events: $e');
+    } catch (e) {
+      print('Error checking for events: $e');
+    }
   }
-}
-
-
 
   void searchImmunizations(String query) {
     setState(() {
@@ -79,38 +78,38 @@ Future<void> _checkForEvents() async {
   void handleEventSaved(Map<String, dynamic> eventData) {
     refreshImmunizationList();
   }
-  
- void _showEventDetailsDialog(Event event) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Event Details'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Purpose: ${event.purpose}'),
-              Text('Date: ${event.date}'),
-              Text('Time: ${event.time}'),
-              Text('Venue: ${event.venue}'),
-              Text('Participants: ${event.participants?.join(", ")}'),
-              Text('BHW/Nurse: ${event.bhwOrNurse}'),
-              Text('Notes: ${event.notes}'),
-            ],
+
+  void _showEventDetailsDialog(Event event) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Event Details'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Purpose: ${event.purpose}'),
+                Text('Date: ${event.date}'),
+                Text('Time: ${event.time}'),
+                Text('Venue: ${event.venue}'),
+                Text('Participants: ${event.participants?.join(", ")}'),
+                Text('BHW/Nurse: ${event.bhwOrNurse}'),
+                Text('Notes: ${event.notes}'),
+              ],
+            ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Close'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,9 +213,7 @@ Future<void> _checkForEvents() async {
                     ),
                     minimumSize: const Size(100, 45),
                   ),
-                  onPressed: () {
-                    
-                  },
+                  onPressed: () {},
                   child: const Text(
                     'Generate Report',
                     style: TextStyle(color: Colors.white),
@@ -227,36 +224,36 @@ Future<void> _checkForEvents() async {
           ),
           verticalSpacing(10),
           Expanded(
-            child: FutureBuilder<List<Immunization>>(
-              future: futureImmunization,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text("${snapshot.error}"));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                      child: Text("No immunization records found."));
-                } else {
-                  List<Immunization> immunizations = snapshot.data!;
-                  List<Immunization> filteredList = _searchQuery.isEmpty
-                      ? immunizations
-                      : immunizations
-                          .where((immunization) =>
-                              immunization.id
-                                  .toString()
-                                  .contains(_searchQuery) ||
-                              immunization.name
-                                  .toLowerCase()
-                                  .contains(_searchQuery.toLowerCase()) ||
-                              immunization.vaccineName
-                                  .toLowerCase()
-                                  .contains(_searchQuery.toLowerCase()))
-                          .toList();
+            child: SingleChildScrollView(
+              child: FutureBuilder<List<Immunization>>(
+                future: futureImmunization,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("${snapshot.error}"));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                        child: Text("No immunization records found."));
+                  } else {
+                    List<Immunization> immunizations = snapshot.data!;
+                    List<Immunization> filteredList = _searchQuery.isEmpty
+                        ? immunizations
+                        : immunizations
+                            .where((immunization) =>
+                                immunization.id
+                                    .toString()
+                                    .contains(_searchQuery) ||
+                                immunization.name
+                                    .toLowerCase()
+                                    .contains(_searchQuery.toLowerCase()) ||
+                                immunization.vaccineName
+                                    .toLowerCase()
+                                    .contains(_searchQuery.toLowerCase()))
+                            .toList();
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: SingleChildScrollView(
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: DataTable(
                         showCheckboxColumn: false,
                         columnSpacing: 15,
@@ -329,13 +326,13 @@ Future<void> _checkForEvents() async {
                           );
                         }).toList(),
                       ),
-                    ),
-                  );
-                }
-              },
+                    );
+                  }
+                },
+              ),
             ),
           ),
-          const Spacer(),
+          // const Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
